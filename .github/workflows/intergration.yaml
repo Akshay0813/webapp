@@ -8,30 +8,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set .env file
+        run: |
+          touch .env
+          echo DATABASE_PASSWORD="${{secrets.DATABASE_PASSWORD}}" >> .env
+          echo DATABASE_NAME="${{secrets.DATABASE_NAME}}" >> .env
+          echo DATABASE_USER="${{secrets.DATABASE_USER}}" >> .env
+          echo PORT="${{secrets.PORT}}">>.env
+          echo DATABASE_PORT="${{secrets.PORT}}" >> .env
+          echo HOSTNAME="${{secrets.HOSTNAME}}" >> .env
+          cat .env
+          ls -la
+
       - name: Set up PostgreSQL
         run: |
           sudo apt-get update
-          sudo apt-get install postgresql postgresql-contrib -y
-          sudo systemctl start postgresql
-          sudo -u postgres psql -c "ALTER USER postgres PASSWORD '${{ secrets.DATABASE_PASSWORD }}';"
-          sudo -u postgres psql -c "CREATE DATABASE ${{ secrets.DATABASE_NAME }};"
-          sudo -u postgres psql -c "CREATE USER ${{ secrets.DATABASE_USER }} WITH PASSWORD '${{ secrets.DATABASE_PASSWORD }}';"
-          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${{ secrets.DATABASE_NAME }} TO ${{ secrets.DATABASE_USER }};"
+          sudo apt-get install postgresql postgresql-client
+          sudo service postgresql start
+          pg_isready
 
+      - name: Create PG user and connect
+        run: |
+          # Load environment variables from .env file
+          source .env
+          
+          # Change the user's password using superuser privileges
+          sudo -u postgres psql -c "ALTER USER $DATABASE_USER WITH PASSWORD '$DATABASE_PASSWORD';"
+          
+          # Connect to the 'postgres' database using the specified user and password
+          PGPASSWORD=$DATABASE_PASSWORD psql -U $DATABASE_USER -h $DATABASE_HOST -p $DATABASE_PORT
+          
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
             node-version: 18.x
             cache: 'npm'
-
-      - name: Set .env file
-        run: |
-          echo DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} >> .env
-          echo DATABASE_NAME=${{ secrets.DATABASE_NAME }} >> .env
-          echo DATABASE_USER=${{ secrets.DATABASE_USER }} >> .env
-          echo PORT=${{ secrets.PORT }} >> .env
-          echo DATABASE_PORT=${{ secrets.PORT }} >> .env
-          echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
 
       - name: Run Integration Test
         run: |
