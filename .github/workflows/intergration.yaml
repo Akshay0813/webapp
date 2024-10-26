@@ -13,11 +13,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install postgresql postgresql-contrib -y
           sudo systemctl start postgresql
-          sudo -u postgres psql -c "ALTER USER postgres PASSWORD '${{ secrets.DATABASE_PASSWORD }}';"
-          sudo -u postgres psql -c "CREATE DATABASE ${{ secrets.DATABASE_NAME }};"
-          sudo -u postgres psql -c "CREATE USER ${{ secrets.DATABASE_USER }} WITH PASSWORD '${{ secrets.DATABASE_PASSWORD }}';"
-          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${{ secrets.DATABASE_NAME }} TO ${{ secrets.DATABASE_USER }};"
-
+          sudo -u postgres psql -c "ALTER USER '${{ secrets.DATABASE_USER }}' WITH PASSWORD '${{ secrets.DATABASE_PASSWORD }}';"
+          sudo -u postgres psql -c "CREATE DATABASE ${DATABASE_NAME};"
+          sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${DATABASE_NAME} TO '${{ secrets.DATABASE_USER }}';"
+        env:
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
