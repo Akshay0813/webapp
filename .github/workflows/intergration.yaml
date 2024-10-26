@@ -9,14 +9,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set .env file
+        env:
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          PORT: ${{ secrets.PORT }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          HOSTNAME: ${{ secrets.HOSTNAME }}
+
         run: |
           touch .env
-          echo DATABASE_PASSWORD="${{secrets.DATABASE_PASSWORD}}" >> .env
-          echo DATABASE_NAME="${{secrets.DATABASE_NAME}}" >> .env
-          echo DATABASE_USER="${{secrets.DATABASE_USER}}" >> .env
-          echo PORT="${{secrets.PORT}}">>.env
-          echo DATABASE_PORT="${{secrets.PORT}}" >> .env
-          echo HOSTNAME="${{secrets.HOSTNAME}}" >> .env
+          echo DATABASE_PASSWORD=$DATABASE_PASSWORD >> .env
+          echo DATABASE_NAME=$DATABASE_NAME >> .env
+          echo DATABASE_USER=$DATABASE_USER >> .env
+          echo PORT=$secrets.PORT >> .env
+          echo DATABASE_PORT=$DATABASE_PORT >> .env
+          echo HOSTNAME=$HOSTNAME >> .env
           cat .env
           ls -la
 
