@@ -8,6 +8,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set .env file
+        run: |
+          echo DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} >> .env
+          echo DATABASE_NAME=${{ secrets.DATABASE_NAME }} >> .env
+          echo DATABASE_USER=${{ secrets.DATABASE_USER }} >> .env
+          echo PORT=${{ secrets.PORT }} >> .env
+          echo DATABASE_PORT=${{ secrets.PORT }} >> .env
+          echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
+
       - name: Set up PostgreSQL
         run: |
           sudo apt-get update
@@ -25,15 +34,6 @@ jobs:
           
           # Connect to the 'postgres' database using the specified user and password
           PGPASSWORD=$DATABASE_PASS psql -U $DATABASE_USER -h $DATABASE_HOST -p $DATABASE_PORT
-      
-      - name: Set .env file
-        run: |
-          echo DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} >> .env
-          echo DATABASE_NAME=${{ secrets.DATABASE_NAME }} >> .env
-          echo DATABASE_USER=${{ secrets.DATABASE_USER }} >> .env
-          echo PORT=${{ secrets.PORT }} >> .env
-          echo DATABASE_PORT=${{ secrets.PORT }} >> .env
-          echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
           
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
